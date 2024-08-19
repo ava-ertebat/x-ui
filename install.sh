@@ -1,250 +1,141 @@
 #!/bin/bash
 
-red='\033[0;31m'
-green='\033[0;32m'
-yellow='\033[0;33m'
-plain='\033[0m'
+# رنگ‌ها و فرمت‌ها
+GREEN="\033[0;32m"
+YELLOW="\033[1;33m"  
+RED="\033[1;31m"    
+BOLD="\033[1m"       
+RESET="\033[0m"     
 
-cur_dir=$(pwd)
-
-# check root
-[[ $EUID -ne 0 ]] && echo -e "${red}Fatal error: ${plain} Please run this script with root privilege \n " && exit 1
-
-# Check OS and set release variable
-if [[ -f /etc/os-release ]]; then
-    source /etc/os-release
-    release=$ID
-elif [[ -f /usr/lib/os-release ]]; then
-    source /usr/lib/os-release
-    release=$ID
-else
-    echo "Failed to check the system OS, please contact the author!" >&2
-    exit 1
-fi
-echo "The OS release is: $release"
-
-arch() {
-    case "$(uname -m)" in
-    x86_64 | x64 | amd64) echo 'amd64' ;;
-    i*86 | x86) echo '386' ;;
-    armv8* | armv8 | arm64 | aarch64) echo 'arm64' ;;
-    armv7* | armv7 | arm) echo 'armv7' ;;
-    armv6* | armv6) echo 'armv6' ;;
-    armv5* | armv5) echo 'armv5' ;;
-    s390x) echo 's390x' ;;
-    *) echo -e "${green}Unsupported CPU architecture! ${plain}" && rm -f install.sh && exit 1 ;;
-    esac
+# تابع برای وسط‌چین کردن متن
+center_text() {
+    local text="$1"
+    local terminal_width=$(tput cols)
+    local text_length=${#text}
+    local padding=$(( (terminal_width - text_length) / 2 ))
+    printf "%${padding}s%s\n" "" "$text"
 }
 
-echo "arch: $(arch)"
+# تابع برای چاپ شماره با رنگ مشخص
+print_number() {
+    local number="$1"
+    local color="$2"
+    echo -e "${color}${number}${RESET}"
+}
 
-os_version=""
-os_version=$(grep -i version_id /etc/os-release | cut -d \" -f2 | cut -d . -f1)
+clear
 
-if [[ "${release}" == "arch" ]]; then
-    echo "Your OS is Arch Linux"
-elif [[ "${release}" == "parch" ]]; then
-    echo "Your OS is Parch linux"
-elif [[ "${release}" == "manjaro" ]]; then
-    echo "Your OS is Manjaro"
-elif [[ "${release}" == "armbian" ]]; then
-    echo "Your OS is Armbian"
-elif [[ "${release}" == "opensuse-tumbleweed" ]]; then
-    echo "Your OS is OpenSUSE Tumbleweed"
-elif [[ "${release}" == "centos" ]]; then
-    if [[ ${os_version} -lt 8 ]]; then
-        echo -e "${red} Please use CentOS 8 or higher ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "ubuntu" ]]; then
-    if [[ ${os_version} -lt 20 ]]; then
-        echo -e "${red} Please use Ubuntu 20 or higher version!${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "fedora" ]]; then
-    if [[ ${os_version} -lt 36 ]]; then
-        echo -e "${red} Please use Fedora 36 or higher version!${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "debian" ]]; then
-    if [[ ${os_version} -lt 11 ]]; then
-        echo -e "${red} Please use Debian 11 or higher ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "almalinux" ]]; then
-    if [[ ${os_version} -lt 9 ]]; then
-        echo -e "${red} Please use AlmaLinux 9 or higher ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "rocky" ]]; then
-    if [[ ${os_version} -lt 9 ]]; then
-        echo -e "${red} Please use Rocky Linux 9 or higher ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "oracle" ]]; then
-    if [[ ${os_version} -lt 8 ]]; then
-        echo -e "${red} Please use Oracle Linux 8 or higher ${plain}\n" && exit 1
-    fi
-else
-    echo -e "${red}Your operating system is not supported by this script.${plain}\n"
-    echo "Please ensure you are using one of the following supported operating systems:"
-    echo "- Ubuntu 20.04+"
-    echo "- Debian 11+"
-    echo "- CentOS 8+"
-    echo "- Fedora 36+"
-    echo "- Arch Linux"
-    echo "- Parch Linux"
-    echo "- Manjaro"
-    echo "- Armbian"
-    echo "- AlmaLinux 9+"
-    echo "- Rocky Linux 9+"
-    echo "- Oracle Linux 8+"
-    echo "- OpenSUSE Tumbleweed"
-    exit 1
+# خوشامدگویی
+center_text "${BOLD}${GREEN}سلام من امید آخرتی هستم و در این اسکریپت تلاش کردم فرایند نصب پنل V2ray رو برای شما عزیزان هوشمند و ساده بکنم${RESET}"
+echo
+center_text "${BOLD}${GREEN}اگر سوال یا کمکی از من بر میومد خوشحال میشم کمک بکنم${RESET}"
+echo
+
+# شماره تماس و همراه
+center_text "$(print_number "شماره تماس : 02191013218" "$YELLOW")"
+echo
+center_text "$(print_number "شماره همراه : 09163422797" "$RED")"
+echo
+
+# توضیحات
+echo -e "${BOLD}${GREEN}توی این اسکریپت میشه سرور های خودتون رو از راه دور کانفیگ کرده و نیازی نیست که تک تک اونها رو مدیریت بکنید${RESET}"
+echo
+echo -e "${BOLD}${GREEN}اگر فقط یک سرور دارید صرفا آدرس همون سرور رو وارد بکنید${RESET}"
+echo
+echo -e "${BOLD}${GREEN}اگر بیش از یک سرور دارید اسامی اونها رو توی یک فایل متنی آماده کنید${RESET}"
+echo
+echo -e "${BOLD}${GREEN}وقتی سیستم لیست دامنه رو از شما درخواست کرد آدرس همه سرور هاتون رو به صورت یکجا وارد کنید${RESET}"
+echo
+echo -e "${BOLD}${GREEN}برای مثال: server1.google.com server2.google.com server3.yahoo.com v2ray.alireza.com vpn.omid.ir${RESET}"
+echo
+echo -e "${BOLD}${GREEN}نکته: بین اسم سرور هاتون حتما یک فاصله قرار بدید${RESET}"
+echo
+echo -e "${BOLD}${GREEN}نکته دوم: اینکه اسم سرور یا همون دامنه شما چی باشه اصلاً مهم نیست، مهم اینه که وقتی پینگ گرفتید آدرس اصلی سرور رو بهتون نشون بده${RESET}"
+echo
+echo -e "${BOLD}${GREEN}نکته سوم و مهم ترین بخش: در حالتی که بیش از یک سرور دارید، نام کاربری و رمز عبور تمام سرور هاتون باید یکسان باشه${RESET}"
+echo
+echo
+echo
+echo
+echo
+echo
+echo
+
+# دریافت ورودی‌های کاربر
+read -p "نام کاربری سرور خود را به انگلیسی وارد کنید:(برای مثال root) " ssh_user
+echo
+read -s -p "رمز عبور سرور خود را وارد کنید:(برای مثال swordfish) " ssh_pass
+echo
+read -p "آدرس ایمیل خود را برای دریافت گواهی SSL وارد کنید:(برای مثال omid@akherati.ir) " email
+echo
+read -p "لیست دامنه یا دامنه‌های خود را وارد کنید (بعد از وارد کردن هر دامنه یک فاصله یا همان (space) قرار دهید): " servers
+echo
+
+# انتخاب عملیات
+echo "می‌خواهید چه کاری انجام دهم؟"
+echo
+echo "1) تمدید سریع SSL"
+echo
+echo "2) نصب V2Ray"
+echo
+read -p "یک عدد را وارد کنید (1 یا 2): " action
+echo
+
+# اگر گزینه نصب V2Ray انتخاب شد، انتخاب پنل مورد نظر
+if [ "$action" == "2" ]; then
+    echo
+    echo "کدام پنل را می‌خواهید نصب کنید؟"
+    echo
+    echo "1) پنل علیرضا"
+    echo
+    echo "2) پنل صنایی"
+    read -p "یک عدد را وارد کنید (1 یا 2): " panel_choice
 fi
 
-install_dependencies() {
-    case "${release}" in
-    centos | almalinux | rocky | oracle)
-        yum -y update && yum install -y -q wget curl tar tzdata
-        ;;
-    fedora)
-        dnf -y update && dnf install -y -q wget curl tar tzdata
-        ;;
-    arch | manjaro | parch)
-        pacman -Syu && pacman -Syu --noconfirm wget curl tar tzdata
-        ;;
-    opensuse-tumbleweed)
-        zypper refresh && zypper -q install -y wget curl tar timezone
-        ;;
-    *)
-        apt-get update && apt-get install -y -q wget curl tar tzdata
-        ;;
-    esac
-}
+# متغیر برای ذخیره خطاها
+error_log=""
 
-#This function will be called when user installed x-ui out of security
-config_after_install() {
-    echo -e "${yellow}Install/update finished! For security it's recommended to modify panel settings ${plain}"
-    read -p "Do you want to continue with the modification [y/n]? ": config_confirm
-    if [[ "${config_confirm}" == "y" || "${config_confirm}" == "Y" ]]; then
-        read -p "Please set up your username:" config_account
-        echo -e "${yellow}Your username will be:${config_account}${plain}"
-        read -p "Please set up your password:" config_password
-        echo -e "${yellow}Your password will be:${config_password}${plain}"
-        read -p "Please set up the panel port:" config_port
-        echo -e "${yellow}Your panel port is:${config_port}${plain}"
-        echo -e "${yellow}Initializing, please wait...${plain}"
-        /usr/local/x-ui/x-ui setting -username ${config_account} -password ${config_password}
-        echo -e "${yellow}Account name and password set successfully!${plain}"
-        /usr/local/x-ui/x-ui setting -port ${config_port}
-        echo -e "${yellow}Panel port set successfully!${plain}"
-    else
-        echo -e "${red}cancel...${plain}"
-        if [[ ! -f "/etc/x-ui/x-ui.db" ]]; then
-            local usernameTemp=$(head -c 6 /dev/urandom | base64)
-            local passwordTemp=$(head -c 6 /dev/urandom | base64)
-            /usr/local/x-ui/x-ui setting -username ${usernameTemp} -password ${passwordTemp}
-            echo -e "this is a fresh installation,will generate random login info for security concerns:"
-            echo -e "###############################################"
-            echo -e "${green}username:${usernameTemp}${plain}"
-            echo -e "${green}password:${passwordTemp}${plain}"
-            echo -e "###############################################"
-            echo -e "${red}if you forgot your login info,you can type x-ui and then type 7 to check after installation${plain}"
+# اجرای عملیات انتخاب شده برای هر سرور
+for server in $servers
+do
+    if [ "$action" == "1" ]; then
+        echo
+        echo "تمدید SSL برای $server"
+        result=$(sshpass -p "$ssh_pass" ssh -o StrictHostKeyChecking=no $ssh_user@$server "
+            ~/.acme.sh/acme.sh --issue -d $server --standalone --force &&
+            ~/.acme.sh/acme.sh --installcert -d $server --key-file /root/private.key --fullchain-file /root/cert.crt
+        " 2>&1) || error_log+="خطا در تمدید SSL برای سرور $server\n$result\n"
+    
+    elif [ "$action" == "2" ]; then
+        if [ "$panel_choice" == "1" ]; then
+            echo
+            echo "در حال نصب پنل علیرضا در سرور $server"
+            result=$(sshpass -p "$ssh_pass" ssh -o StrictHostKeyChecking=no $ssh_user@$server "
+                curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh | bash 2>&1
+            " 2>&1) || error_log+="خطا در نصب پنل علیرضا در سرور $server\n$result\n"
+        
+        elif [ "$panel_choice" == "2" ]; then
+            echo
+            echo "در حال نصب پنل صنایی در سرور $server"
+            result=$(sshpass -p "$ssh_pass" ssh -o StrictHostKeyChecking=no $ssh_user@$server "
+                curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh | bash 2>&1
+            " 2>&1) || error_log+="خطا در نصب پنل صنایی در سرور $server\n$result\n"
         else
-            echo -e "${red} this is your upgrade,will keep old settings,if you forgot your login info,you can type x-ui and then type 7 to check${plain}"
-        fi
-    fi
-    /usr/local/x-ui/x-ui migrate
-}
-
-install_x-ui() {
-    # checks if the installation backup dir exist. if existed then ask user if they want to restore it else continue installation.
-    if [[ -e /usr/local/x-ui-backup/ ]]; then
-        read -p "Failed installation detected. Do you want to restore previously installed version? [y/n]? ": restore_confirm
-        if [[ "${restore_confirm}" == "y" || "${restore_confirm}" == "Y" ]]; then
-            systemctl stop x-ui
-            mv /usr/local/x-ui-backup/x-ui.db /etc/x-ui/ -f
-            mv /usr/local/x-ui-backup/ /usr/local/x-ui/ -f
-            systemctl start x-ui
-            echo -e "${green}previous installed x-ui restored successfully${plain}, it is up and running now..."
-            exit 0
-        else
-            echo -e "Continuing installing x-ui ..."
-        fi
-    fi
-
-    cd /usr/local/
-
-    if [ $# == 0 ]; then
-        last_version=$(curl -Ls "https://api.github.com/repos/alireza0/x-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-        if [[ ! -n "$last_version" ]]; then
-            echo -e "${red}Failed to fetch x-ui version, it maybe due to Github API restrictions, please try it later${plain}"
-            exit 1
-        fi
-        echo -e "Got x-ui latest version: ${last_version}, beginning the installation..."
-        wget -N --no-check-certificate -O /usr/local/x-ui-linux-$(arch).tar.gz https://github.com/alireza0/x-ui/releases/download/${last_version}/x-ui-linux-$(arch).tar.gz
-        if [[ $? -ne 0 ]]; then
-            echo -e "${red}Downloading x-ui failed, please be sure that your server can access Github ${plain}"
+            echo
+            echo "خطا در انتخاب پنل!"
             exit 1
         fi
     else
-        last_version=$1
-        url="https://github.com/alireza0/x-ui/releases/download/${last_version}/x-ui-linux-$(arch).tar.gz"
-        echo -e "Beginning to install x-ui v$1"
-        wget -N --no-check-certificate -O /usr/local/x-ui-linux-$(arch).tar.gz ${url}
-        if [[ $? -ne 0 ]]; then
-            echo -e "${red}download x-ui v$1 failed,please check the version exists${plain}"
-            exit 1
-        fi
+        echo
+        echo "درخواست شما معتبر نیست!"
+        exit 1
     fi
+done
 
-    if [[ -e /usr/local/x-ui/ ]]; then
-        systemctl stop x-ui
-        mv /usr/local/x-ui/ /usr/local/x-ui-backup/ -f
-        cp /etc/x-ui/x-ui.db /usr/local/x-ui-backup/ -f
-    fi
-
-    tar zxvf x-ui-linux-$(arch).tar.gz
-    rm x-ui-linux-$(arch).tar.gz -f
-    cd x-ui
-    chmod +x x-ui
-
-    # Check the system's architecture and rename the file accordingly
-    if [[ $(arch) == "armv7" ]]; then
-        mv bin/xray-linux-$(arch) bin/xray-linux-arm
-        chmod +x bin/xray-linux-arm
-    fi
-    chmod +x x-ui bin/xray-linux-$(arch)
-    cp -f x-ui.service /etc/systemd/system/
-    wget --no-check-certificate -O /usr/bin/x-ui https://raw.githubusercontent.com/alireza0/x-ui/main/x-ui.sh
-    chmod +x /usr/local/x-ui/x-ui.sh
-    chmod +x /usr/bin/x-ui
-    config_after_install
-    rm /usr/local/x-ui-backup/ -rf
-    #echo -e "If it is a new installation, the default web port is ${green}54321${plain}, The username and password are ${green}admin${plain} by default"
-    #echo -e "Please make sure that this port is not occupied by other procedures,${yellow} And make sure that port 54321 has been released${plain}"
-    #    echo -e "If you want to modify the 54321 to other ports and enter the x-ui command to modify it, you must also ensure that the port you modify is also released"
-    #echo -e ""
-    #echo -e "If it is updated panel, access the panel in your previous way"
-    #echo -e ""
-    systemctl daemon-reload
-    systemctl enable x-ui
-    systemctl start x-ui
-    echo -e "${green}x-ui v${last_version}${plain} installation finished, it is up and running now..."
-    echo -e ""
-    echo "X-UI Control Menu Usage"
-    echo "------------------------------------------"
-    echo "SUBCOMMANDS:"
-    echo "x-ui              - Admin Management Script"
-    echo "x-ui start        - Start"
-    echo "x-ui stop         - Stop"
-    echo "x-ui restart      - Restart"
-    echo "x-ui status       - Current Status"
-    echo "x-ui enable       - Enable Autostart on OS Startup"
-    echo "x-ui disable      - Disable Autostart on OS Startup"
-    echo "x-ui log          - Check Logs"
-    echo "x-ui update       - Update"
-    echo "x-ui install      - Install"
-    echo "x-ui uninstall    - Uninstall"
-    echo "x-ui help         - Control Menu Usage"
-    echo "------------------------------------------"
-}
-
-echo -e "${green}Running...${plain}"
-install_dependencies
-install_x-ui $1
+# نمایش خطاها در پایان
+if [ -n "$error_log" ]; then
+    echo -e "\nخطاهای دریافتی هنگام نصب پنل:"
+    echo -e "$error_log"
+else
+    echo "نصب با موفقیت و بدون خطا انجام شد!"
+fi
